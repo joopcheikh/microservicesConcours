@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/registration
     username: postgres
-    password: qqqq
+    password: aaaa
 
   jpa:
     hibernate:
@@ -18,7 +18,7 @@ spring:
     
 
 server:
-  port: 8091
+  port: 8095
 
 logging:
   level:

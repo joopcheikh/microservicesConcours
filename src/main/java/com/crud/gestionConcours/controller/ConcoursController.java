@@ -1,5 +1,6 @@
-package com.crud.gestionConcours.controller;
+package com.crud.gestionconcours.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +13,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.crud.gestionConcours.model.Concours;
-import com.crud.gestionConcours.services.ConcoursServiceImpl;
+import com.crud.gestionconcours.model.Concours;
+import com.crud.gestionconcours.services.ConcoursServiceImpl;
 
 @RestController
 public class ConcoursController {
@@ -23,6 +24,7 @@ public class ConcoursController {
 
     @PostMapping("/add")
     public ResponseEntity<Concours> addConcours(@RequestBody Concours concours) {
+        System.out.println(concours); 
         return ResponseEntity.ok(concoursServiceImpl.addConcours(concours));
     }
 
@@ -41,11 +43,16 @@ public class ConcoursController {
         Optional<Concours> findConcours = concoursServiceImpl.findConcourById(id);
         return ResponseEntity.of(findConcours);
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteConcour(@PathVariable Integer id) {
         concoursServiceImpl.deleteConcour(id);
         return ResponseEntity.noContent().build();
     }
-    
+
+    @GetMapping("/all-concours")
+    public List<Concours> getAllConcours() {
+        return concoursServiceImpl.getAllConcours();
+    }
+
 }

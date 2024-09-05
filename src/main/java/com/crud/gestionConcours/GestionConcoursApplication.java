@@ -1,13 +1,13 @@
-package com.crud.gestionConcours;
+package com.crud.gestionconcours;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class GestionConcoursApplication {
+public class gestionconcoursApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(GestionConcoursApplication.class, args);
+		SpringApplication.run(gestionconcoursApplication.class, args);
 	}
 
 }

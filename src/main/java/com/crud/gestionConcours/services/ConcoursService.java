@@ -1,8 +1,8 @@
-package com.crud.gestionConcours.services;
+package com.crud.gestionconcours.services;
 
 import java.util.Optional;
 
-import com.crud.gestionConcours.model.Concours;
+import com.crud.gestionconcours.model.Concours;
 
 public interface ConcoursService {
 

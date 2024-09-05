@@ -1,4 +1,6 @@
-package com.crud.gestionConcours.model;
+package com.crud.gestionconcours.model;
+
+import java.sql.Date;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,7 @@ public class Concours {
     private Integer id;
 
     private String nom;
+    private Date date;
 
     private String description;
     

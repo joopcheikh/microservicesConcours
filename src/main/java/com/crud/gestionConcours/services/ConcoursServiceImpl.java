@@ -1,12 +1,13 @@
-package com.crud.gestionConcours.services;
+package com.crud.gestionconcours.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.crud.gestionConcours.model.Concours;
-import com.crud.gestionConcours.repository.ConcoursRepository;
+import com.crud.gestionconcours.model.Concours;
+import com.crud.gestionconcours.repository.ConcoursRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -60,6 +61,10 @@ public class ConcoursServiceImpl implements ConcoursService {
         }
 
         concoursRepository.deleteById(id);
+    }
+
+    public List<Concours> getAllConcours() {
+        return concoursRepository.findAll();
     }
 
 }
