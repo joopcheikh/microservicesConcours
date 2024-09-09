@@ -1,4 +1,6 @@
 package com.crud.gestionconcours.config;
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import javax.sql.DataSource;
 
 @EnableMethodSecurity
 @Configuration
@@ -36,8 +37,8 @@ public class SpringSecurityConfig {
         http.cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/all-concours").permitAll()//.hasAnyAuthority("ADMIN", "RECRUITER", "USER")
-                        .requestMatchers("/add", "/change", "/delete/{id}").hasAnyAuthority("ADMIN")
+                        .requestMatchers("/all-concours").permitAll()//hasAnyAuthority("ADMIN", "RECRUITER", "USER")
+                        .requestMatchers("/add", "/change", "/delete/{id}").permitAll()//hasAnyAuthority("ADMIN")
                         .anyRequest().permitAll())
                 .httpBasic(basic -> basic.realmName("My Realm"));
         return http.build();

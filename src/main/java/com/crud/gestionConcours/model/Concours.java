@@ -26,5 +26,7 @@ public class Concours {
     private Date date;
 
     private String description;
+
+    private String photoUrl;
     
 }

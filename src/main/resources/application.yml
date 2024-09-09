@@ -15,6 +15,13 @@ spring:
       hibernate:
         format_sql: true
     database: postgresql
+
+  
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
     
 
 server:
@@ -24,4 +31,12 @@ logging:
   level:
     org.springframework.mail: DEBUG
     org.springframework.web: DEBUG
+
+
+file:
+  upload-dir: uploads
+
+
+
+
 
