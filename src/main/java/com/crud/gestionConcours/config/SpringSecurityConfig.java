@@ -3,6 +3,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,18 +31,31 @@ public class SpringSecurityConfig {
         }
     }
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests((requests) -> requests
-                .anyRequest().permitAll()); 
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers("/all-concours").permitAll()//.hasAnyAuthority("ADMIN", "RECRUITER", "USER")
+                        .requestMatchers("/add", "/change", "/delete/{id}").hasAnyAuthority("ADMIN")
+                        .anyRequest().permitAll())
+                .httpBasic(basic -> basic.realmName("My Realm"));
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Autowired
+    private DataSource ds;
+
+    @Autowired
+    public void configureAMBuilder(AuthenticationManagerBuilder auth) throws Exception {
+        auth.jdbcAuthentication().dataSource(ds)
+                .authoritiesByUsernameQuery("select email, role from users where email=?")
+                .usersByUsernameQuery("select email, password, 1 from users where email=?");
+
     }
 }

@@ -38,13 +38,7 @@ public class ConcoursController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Concours> findConcourById(@PathVariable Integer id) {
-        Optional<Concours> findConcours = concoursServiceImpl.findConcourById(id);
-        return ResponseEntity.of(findConcours);
-    }
-
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteConcour(@PathVariable Integer id) {
         concoursServiceImpl.deleteConcour(id);
         return ResponseEntity.noContent().build();
