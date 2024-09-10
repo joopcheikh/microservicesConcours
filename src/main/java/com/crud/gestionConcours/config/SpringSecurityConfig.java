@@ -1,47 +1,60 @@
 package com.crud.gestionconcours.config;
-import javax.sql.DataSource;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@EnableMethodSecurity
+import com.crud.gestionconcours.filter.JwtAuthenticationFilter;
+import com.crud.gestionconcours.services.UserDetailsServiceImp;
+
+
 @Configuration
+@EnableWebSecurity
+
 public class SpringSecurityConfig {
 
-    @Configuration
-    public class WebMvcConfig implements WebMvcConfigurer {
-        @Override
-        public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/**")
-                    .allowedOrigins(
-                            "http://localhost:5173",
-                            "http://localhost:8080")
-                    .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                    .allowedHeaders("*")
-                    .allowCredentials(true);
-        }
+    private UserDetailsServiceImp userDetailsServiceImp;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    public SpringSecurityConfig(
+            UserDetailsServiceImp userDetailsServiceImp,
+            JwtAuthenticationFilter jwtAuthenticationFilter
+    ) {
+        this.userDetailsServiceImp = userDetailsServiceImp;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/all-concours").permitAll()//hasAnyAuthority("ADMIN", "RECRUITER", "USER")
-                        .requestMatchers("/add", "/change", "/delete/{id}").permitAll()//hasAnyAuthority("ADMIN")
-                        .anyRequest().permitAll())
-                .httpBasic(basic -> basic.realmName("My Realm"));
-        return http.build();
+   @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+        return httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(
+                        req -> req
+                        .requestMatchers("/all-concours").hasAnyAuthority("ADMIN", "RECRUITER", "USER")
+                        .requestMatchers("/add", "/change", "/delete/{id}").hasAnyAuthority("ADMIN")
+                                .anyRequest()
+                                .authenticated()
+                )
+                .userDetailsService(userDetailsServiceImp)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(Customizer.withDefaults())
+                .build();
     }
 
     @Bean
@@ -49,14 +62,23 @@ public class SpringSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
-    private DataSource ds;
 
-    @Autowired
-    public void configureAMBuilder(AuthenticationManagerBuilder auth) throws Exception {
-        auth.jdbcAuthentication().dataSource(ds)
-                .authoritiesByUsernameQuery("select email, role from users where email=?")
-                .usersByUsernameQuery("select email, password, 1 from users where email=?");
+     @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
 
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                // allow all origins to access our service
+                registry.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
+                        .allowedHeaders("*");
+            }
+        };
     }
 }
