@@ -37,6 +37,7 @@ public class ConcoursServiceImpl implements ConcoursService {
             Concours concoursToUpdate = existingConcours.get();
             concoursToUpdate.setNom(concours.getNom());
             concoursToUpdate.setDescription(concours.getDescription());
+            concoursToUpdate.setCriteres(concours.getCriteres());
             return concoursRepository.save(concoursToUpdate);
         } else {
             log.error("Le concours n'est pas trouve");

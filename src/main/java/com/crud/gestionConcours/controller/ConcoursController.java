@@ -33,6 +33,7 @@ public class ConcoursController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("nom") String nom,
             @RequestParam("date") String date,
+            @RequestParam("criteres") String criteres,
             @RequestParam("description") String description) {
         
         try {
@@ -43,6 +44,7 @@ public class ConcoursController {
             concours.setDate(java.sql.Date.valueOf(date)); // Assurez-vous que la date est bien formatée
             concours.setDescription(description);
             concours.setPhotoUrl(photoUrl);
+            concours.setCriteres(criteres);
 
             return ResponseEntity.ok(concoursServiceImpl.addConcours(concours));
         } catch (IOException e) {
