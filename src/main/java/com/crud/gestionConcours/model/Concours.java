@@ -2,10 +2,12 @@ package com.crud.gestionconcours.model;
 
 import java.sql.Date;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,9 +27,15 @@ public class Concours {
     private String nom;
     private Date date;
 
-    private String description;
-    private String criteres;
+    private String status;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String criteres;
     private String photoUrl;
     
 }
