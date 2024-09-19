@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/picture")
+@RequestMapping("/picture/concours")
 public class FileController {
 
     private final String fileBasePath = "uploads/";

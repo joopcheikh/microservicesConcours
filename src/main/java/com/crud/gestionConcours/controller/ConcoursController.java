@@ -28,7 +28,7 @@ public class ConcoursController {
         @Autowired
     private FileStorageService fileStorageService;
 
-    @PostMapping("/add")
+    @PostMapping("/add/concours")
     public ResponseEntity<Concours> addConcours(
             @RequestParam("file") MultipartFile file,
             @RequestParam("nom") String nom,
@@ -52,7 +52,7 @@ public class ConcoursController {
         }
     }
 
-    @PutMapping("/change")
+    @PutMapping("/change/concours")
     public ResponseEntity<Concours> changeConcours(@RequestBody Concours concours) {
         Concours updatedConcours = concoursServiceImpl.changeConcours(concours);
         if (updatedConcours != null) {
@@ -62,7 +62,7 @@ public class ConcoursController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/concours/{id}")
     public ResponseEntity<Void> deleteConcour(@PathVariable Integer id) {
         concoursServiceImpl.deleteConcour(id);
         return ResponseEntity.noContent().build();
