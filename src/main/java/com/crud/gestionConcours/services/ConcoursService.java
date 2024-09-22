@@ -12,6 +12,6 @@ public interface ConcoursService {
 
     public Optional<Concours> findConcourById(Integer id);
 
-    public void deleteConcour(Integer id);
+    public boolean deleteConcour(Integer id);
 
 }

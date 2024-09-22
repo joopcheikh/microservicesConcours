@@ -2,6 +2,7 @@ package com.crud.gestionconcours.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,32 +26,33 @@ public class ConcoursController {
     @Autowired
     public ConcoursServiceImpl concoursServiceImpl;
 
-        @Autowired
+    @Autowired
     private FileStorageService fileStorageService;
 
-    @PostMapping("/add/concours")
-    public ResponseEntity<Concours> addConcours(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("nom") String nom,
-            @RequestParam("date") String date,
-            @RequestParam("criteres") String criteres,
-            @RequestParam("description") String description) {
-        
-        try {
-            String photoUrl = fileStorageService.storeFile(file);
+   @PostMapping("/add/concours")
+public ResponseEntity<Concours> addConcours(
+        @RequestParam("file") MultipartFile file,
+        @RequestParam("nom") String nom,
+        @RequestParam("date") String date,
+        @RequestParam("criteres") String criteres,
+        @RequestParam("description") String description) {
 
-            Concours concours = new Concours();
-            concours.setNom(nom);
-            concours.setDate(java.sql.Date.valueOf(date)); // Assurez-vous que la date est bien formatée
-            concours.setDescription(description);
-            concours.setPhotoUrl(photoUrl);
-            concours.setCriteres(criteres);
-
-            return ResponseEntity.ok(concoursServiceImpl.addConcours(concours));
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body(null);
-        }
+    try {
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+        String photoUrl = fileStorageService.storeFileWithNewName(file, uniqueFileName);
+        Concours concours = new Concours();
+        concours.setNom(nom);
+        concours.setDate(java.sql.Date.valueOf(date));
+        concours.setDescription(description);
+        concours.setPhotoUrl(photoUrl);
+        concours.setCriteres(criteres);
+        return ResponseEntity.ok(concoursServiceImpl.addConcours(concours));
+    } catch (IOException e) {
+        return ResponseEntity.status(500).body(null);
     }
+}
 
     @PutMapping("/change/concours")
     public ResponseEntity<Concours> changeConcours(@RequestBody Concours concours) {
@@ -64,14 +66,17 @@ public class ConcoursController {
 
     @DeleteMapping("/delete/concours/{id}")
     public ResponseEntity<Void> deleteConcour(@PathVariable Integer id) {
-        concoursServiceImpl.deleteConcour(id);
-        return ResponseEntity.noContent().build();
+        boolean isDeleted = concoursServiceImpl.deleteConcour(id);
+        if (isDeleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.status(404).build(); 
+        }
     }
 
     @GetMapping("/all-concours")
     public List<Concours> getAllConcours() {
         return concoursServiceImpl.getAllConcours();
     }
-
 
 }

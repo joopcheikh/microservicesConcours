@@ -1,5 +1,8 @@
 package com.crud.gestionconcours.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,17 +58,31 @@ public class ConcoursServiceImpl implements ConcoursService {
         return concoursFinded;
     }
 
-    @Override
-    public void deleteConcour(Integer id) {
-        if (id == null) {
-            log.error("id is null");
-        }
 
-        concoursRepository.deleteById(id);
-    }
 
     public List<Concours> getAllConcours() {
         return concoursRepository.findAll();
+    }
+
+     public boolean deleteConcour(Integer id) {
+        Optional<Concours> concoursOptional = concoursRepository.findById(id);
+
+        if (concoursOptional.isPresent()) {
+            Concours concours = concoursOptional.get();
+            String photoUrl = concours.getPhotoUrl();
+            if (photoUrl != null && !photoUrl.isEmpty()) {
+                try {
+                    Files.deleteIfExists(Paths.get(photoUrl));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return false; 
+                }
+            }
+
+            concoursRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
 }
