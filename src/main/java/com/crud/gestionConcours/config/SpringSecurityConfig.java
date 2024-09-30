@@ -45,7 +45,7 @@ public class SpringSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req -> req
-                        .requestMatchers("/all-concours","/picture/**").permitAll()
+                        .requestMatchers("/all-concours","/picture/**","/uploads/**").permitAll()
                         .requestMatchers("/add", "/change", "/delete/{id}").hasAnyAuthority("ADMIN")
                                 .anyRequest()
                                 .authenticated()

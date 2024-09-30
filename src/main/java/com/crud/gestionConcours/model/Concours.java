@@ -35,6 +35,12 @@ public class Concours {
 
     @Lob
     @Column(columnDefinition = "TEXT")
+    private String dossiers;
+
+    private Integer[] candidateType;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String criteres;
     private String photoUrl;
     
