@@ -24,7 +24,6 @@ import com.crud.gestionconcours.model.Concours;
 import com.crud.gestionconcours.services.ConcoursServiceImpl;
 import com.crud.gestionconcours.services.FileStorageService;
 
-
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,7 +31,6 @@ import org.springframework.http.HttpStatus;
 @RestController
 public class ConcoursController {
 
-    
     @org.springframework.beans.factory.annotation.Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -79,12 +77,59 @@ public class ConcoursController {
     }
 
     @PutMapping("/change/concours")
-    public ResponseEntity<Concours> changeConcours(@RequestBody Concours concours) {
-        Concours updatedConcours = concoursServiceImpl.changeConcours(concours);
-        if (updatedConcours != null) {
+    public ResponseEntity<Concours> changeConcours(
+            @RequestParam("id") Integer id,
+            @RequestParam("nom") String nom,
+            @RequestParam("date") String date,
+            @RequestParam("dossiers") String dossiers,
+            @RequestParam("candidateType") Integer[] candidateType,
+            @RequestParam("criteres") String criteres,
+            @RequestParam("description") String description,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+
+        try {
+            // Récupérer le concours existant
+            Concours concours = concoursServiceImpl.getConcoursById(id);
+
+            if (concours == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Mettre à jour les champs du concours
+            concours.setNom(nom);
+            concours.setDate(java.sql.Date.valueOf(date));
+            concours.setDescription(description);
+            concours.setDossiers(dossiers);
+            concours.setCandidateType(candidateType);
+            concours.setCriteres(criteres);
+
+            // Si un fichier est envoyé, remplacez l'ancien fichier
+            if (file != null && !file.isEmpty()) {
+                // Supprimer l'ancien fichier si nécessaire
+                String oldFilePath = uploadDir + "/" + concours.getPhotoUrl();
+                File oldFile = new File(oldFilePath);
+                if (oldFile.exists()) {
+                    oldFile.delete(); // Supprimer l'ancien fichier
+                }
+
+                // Enregistrer le nouveau fichier
+                String originalFilename = file.getOriginalFilename();
+                String fileExtension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+                String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+                String newPhotoUrl = fileStorageService.storeFileWithNewName(file, uniqueFileName);
+
+                // Mettre à jour l'URL de la photo dans le concours
+                concours.setPhotoUrl(newPhotoUrl);
+            }
+
+            // Sauvegarder le concours mis à jour
+            Concours updatedConcours = concoursServiceImpl.changeConcours(concours);
+
             return ResponseEntity.ok(updatedConcours);
-        } else {
-            return ResponseEntity.notFound().build();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -103,34 +148,31 @@ public class ConcoursController {
         return concoursServiceImpl.getAllConcours();
     }
 
+    @GetMapping("/uploads/{fileName:.+}")
+    public ResponseEntity<Resource> getFile(@PathVariable String fileName) {
+        try {
+            Path path = Paths.get(uploadDir).resolve(fileName);
+            File file = path.toFile();
+            System.out.println("Attempting to access file at: " + path.toString());
+            if (!file.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+            Resource resource = resourceLoader.getResource("file:" + path.toString());
+            if (!file.exists()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"");
 
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
 
-@GetMapping("/uploads/{fileName:.+}")
-public ResponseEntity<Resource> getFile(@PathVariable String fileName) {
-    try {
-        Path path = Paths.get(uploadDir).resolve(fileName);
-        File file = path.toFile();
-        System.out.println("Attempting to access file at: " + path.toString());
-        if (!file.exists()) {
-            return ResponseEntity.notFound().build();
-        }
-        Resource resource = resourceLoader.getResource("file:" + path.toString());
-        if (!file.exists() ) {
+        } catch (Exception e) {
+            // En cas d'exception, retourner une réponse 500
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"");
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(resource);
-
-    } catch (Exception e) {
-        // En cas d'exception, retourner une réponse 500
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-}
-
 
 }

@@ -34,22 +34,34 @@ public class ConcoursServiceImpl implements ConcoursService {
 
     @Override
     public Concours changeConcours(Concours concours) {
-
+    
         Optional<Concours> existingConcours = concoursRepository.findById(concours.getId());
         if (existingConcours.isPresent()) {
             Concours concoursToUpdate = existingConcours.get();
+            
+            // Mettre à jour les autres champs
             concoursToUpdate.setNom(concours.getNom());
             concoursToUpdate.setCandidateType(concours.getCandidateType());
             concoursToUpdate.setDossiers(concours.getDossiers());
             concoursToUpdate.setDescription(concours.getDescription());
             concoursToUpdate.setCriteres(concours.getCriteres());
+            
+            // Vérifier si l'URL de la photo a changé, et la mettre à jour
+            if (concours.getPhotoUrl() != null) {
+                concoursToUpdate.setPhotoUrl(concours.getPhotoUrl());
+            }
+            
             return concoursRepository.save(concoursToUpdate);
         } else {
-            log.error("Le concours n'est pas trouve");
+            log.error("Le concours n'est pas trouvé");
             return null;
         }
     }
-
+    
+    public Concours getConcoursById(Integer id) {
+        Optional<Concours> concours = concoursRepository.findById(id);
+        return concours.orElse(null);
+    }
     @Override
     public Optional<Concours> findConcourById(Integer id) {
         if (id == null) {
