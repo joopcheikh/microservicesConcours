@@ -38,6 +38,12 @@ public class User implements UserDetails {
 
     private String password;
 
+    private Boolean have_postuled = false;
+
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private TypeCandidat type_candidat;
+
     //@OneToOne(cascade = CascadeType.ALL)
     //@JoinColumn(name = "candidature_id", referencedColumnName = "id", nullable = false)
     //private Candidature candidature;
